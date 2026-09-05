@@ -183,8 +183,6 @@ export function suggestAutoFitTile(options: AutoFitInput): AutoFitSize {
     Math.min(tileWidth, tileHeight) / Math.max(tileWidth, tileHeight)
 
   for (let attempt = 0; attempt < 24; attempt++) {
-    const targetMW = wallWidth / nx
-    const targetMH = wallHeight / ny
     let tw = 0
     let th = 0
 
