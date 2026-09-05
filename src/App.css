@@ -1,0 +1,371 @@
+:root {
+  color: #1a2330;
+  background:
+    radial-gradient(ellipse at 10% 0%, #d9e6ea 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 20%, #e8ddd0 0%, transparent 45%),
+    #f3f0ea;
+  font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+  line-height: 1.4;
+  -webkit-text-size-adjust: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 2rem;
+  padding-left: max(1.5rem, env(safe-area-inset-left));
+  padding-right: max(1.5rem, env(safe-area-inset-right));
+  padding-bottom: max(2rem, env(safe-area-inset-bottom));
+}
+
+.app-header-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+.app-header-row h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.app-header-row p {
+  margin: 0.25rem 0 0;
+  color: #5a6a78;
+}
+
+.lang-switch {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  color: #455a64;
+  flex-shrink: 0;
+}
+
+.lang-switch select {
+  font: inherit;
+  font-size: 1rem;
+  min-height: 2.5rem;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid #b0bec5;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.app-body {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr) minmax(200px, 240px);
+  gap: 1rem;
+  align-items: start;
+}
+
+.dimension-form {
+  min-width: 0;
+}
+
+.dimension-form fieldset {
+  border: 1px solid #c5d0d6;
+  border-radius: 6px;
+  margin: 0 0 0.75rem;
+  padding: 0.65rem 0.75rem 0.85rem;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.dimension-form legend {
+  padding: 0 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.dimension-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.78rem;
+  color: #455a64;
+  margin-bottom: 0.45rem;
+}
+
+.dimension-form input,
+.dimension-form select {
+  font: inherit;
+  font-size: 1rem;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid #b0bec5;
+  border-radius: 4px;
+  background: #fff;
+  width: 100%;
+  max-width: 100%;
+}
+
+.opening-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  padding: 0.5rem 0;
+  border-top: 1px dashed #cfd8dc;
+}
+
+.unit-field {
+  margin-bottom: 0.55rem;
+}
+
+.unit-select {
+  max-width: 6rem;
+}
+
+.unit-summary {
+  margin: -0.35rem 0 0.75rem;
+  font-size: 0.78rem;
+}
+
+.field-hint {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  color: #607d8b;
+  line-height: 1.35;
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.btn {
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: 1px solid #78909c;
+  background: #eceff1;
+  border-radius: 4px;
+  padding: 0.55rem 0.75rem;
+  min-height: 2.5rem;
+}
+
+.btn-danger {
+  border-color: #c62828;
+  color: #b71c1c;
+  background: #ffebee;
+  grid-column: 1 / -1;
+}
+
+.canvas-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.canvas-frame {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid #c5d0d6;
+  border-radius: 6px;
+  padding: 0.5rem;
+  min-width: 0;
+}
+
+.canvas-label {
+  font-size: 0.75rem;
+  color: #607d8b;
+  margin-bottom: 0.35rem;
+  line-height: 1.35;
+}
+
+.edit-canvas,
+.preview-canvas {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  touch-action: none;
+  border-radius: 4px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.result-panel {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #c5d0d6;
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+  position: sticky;
+  top: 0.75rem;
+  min-width: 0;
+}
+
+.result-panel h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+}
+
+.result-panel dl {
+  margin: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.result-panel dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-bottom: 1px solid #e0e6ea;
+  padding-bottom: 0.35rem;
+}
+
+.result-panel dt {
+  color: #607d8b;
+  font-size: 0.8rem;
+}
+
+.result-panel dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 560;
+  text-align: right;
+  word-break: break-word;
+}
+
+.result-panel .emphasis {
+  color: #0d47a1;
+  font-size: 1.05rem;
+}
+
+.muted {
+  color: #78909c;
+  font-size: 0.9rem;
+}
+
+.error {
+  color: #b71c1c;
+}
+
+.warnings {
+  margin: 0.85rem 0 0;
+  padding-left: 1.1rem;
+  color: #ef6c00;
+  font-size: 0.8rem;
+}
+
+/* Tablet */
+@media (max-width: 960px) {
+  .app {
+    padding: 1rem 1rem 1.5rem;
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+
+  .app-body {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .dimension-form {
+    order: 1;
+  }
+
+  .result-panel {
+    order: 2;
+    position: static;
+  }
+
+  .canvas-column {
+    order: 3;
+  }
+}
+
+/* Phone */
+@media (max-width: 640px) {
+  .app {
+    padding: 0.75rem 0.75rem 1.25rem;
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  }
+
+  .app-header-row {
+    flex-direction: column;
+    gap: 0.65rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .app-header-row h1 {
+    font-size: 1.35rem;
+  }
+
+  .app-header-row p {
+    font-size: 0.85rem;
+  }
+
+  .lang-switch {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .lang-switch select {
+    flex: 1;
+    max-width: 12rem;
+  }
+
+  .opening-row {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-row {
+    flex-direction: column;
+  }
+
+  .btn-row .btn,
+  .dimension-form > fieldset > .btn {
+    width: 100%;
+  }
+
+  .unit-select {
+    max-width: none;
+  }
+
+  .result-panel {
+    padding: 0.75rem;
+  }
+
+  .result-panel dl > div {
+    flex-wrap: wrap;
+  }
+
+  .canvas-frame {
+    padding: 0.4rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .app-header-row h1 {
+    font-size: 1.2rem;
+  }
+
+  .result-panel .emphasis {
+    font-size: 1rem;
+  }
+}
