@@ -57,6 +57,8 @@ export function DimensionForm() {
   const setTile = useEstimateStore((s) => s.setTile)
   const setTileUnit = useEstimateStore((s) => s.setTileUnit)
   const setPattern = useEstimateStore((s) => s.setPattern)
+  const autoFitWallToPattern = useEstimateStore((s) => s.autoFitWallToPattern)
+  const autoFitTileToWall = useEstimateStore((s) => s.autoFitTileToWall)
   const addOpening = useEstimateStore((s) => s.addOpening)
   const updateOpening = useEstimateStore((s) => s.updateOpening)
   const removeOpening = useEstimateStore((s) => s.removeOpening)
@@ -320,6 +322,23 @@ export function DimensionForm() {
             ))}
           </select>
         </label>
+        <div className="btn-row">
+          <button
+            type="button"
+            className="btn"
+            onClick={() => autoFitWallToPattern()}
+          >
+            {t('tile.autoFitWall')}
+          </button>
+          <button
+            type="button"
+            className="btn"
+            onClick={() => autoFitTileToWall()}
+          >
+            {t('tile.autoFitTile')}
+          </button>
+        </div>
+        <p className="field-hint">{t('tile.autoFitHint')}</p>
         <p className="field-hint">{t('tile.unitHint')}</p>
       </fieldset>
     </form>

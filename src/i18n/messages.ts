@@ -48,6 +48,10 @@ const ja: Dict = {
   'tile.grout': '目地（{unit}）',
   'tile.groutPlaceholder': '未指定（既定 2mm）',
   'tile.pattern': '並べ方',
+  'tile.autoFitWall': '壁を合わせる',
+  'tile.autoFitTile': 'タイルを合わせる',
+  'tile.autoFitHint':
+    '壁を合わせる＝タイル固定で壁を切り上げ。タイルを合わせる＝壁固定でタイル寸法を調整。',
   'tile.unitHint':
     '壁とタイルで単位が違っても構いません。計算時にメートルへ揃えます。',
 
@@ -148,6 +152,10 @@ const en: Dict = {
   'tile.grout': 'Grout ({unit})',
   'tile.groutPlaceholder': 'Blank = default 2mm',
   'tile.pattern': 'Layout',
+  'tile.autoFitWall': 'Auto-fit wall',
+  'tile.autoFitTile': 'Auto-fit tile',
+  'tile.autoFitHint':
+    'Auto-fit wall grows the wall to the next module. Auto-fit tile adjusts tile size to the wall.',
   'tile.unitHint':
     'Wall and tile units may differ; values are converted to meters for calculation.',
 

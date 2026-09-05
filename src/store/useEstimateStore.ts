@@ -1,11 +1,18 @@
 import { create } from 'zustand'
-import { BASE_LABOR_PER_AREA } from '../masters/rates'
+import {
+  BASE_LABOR_PER_AREA,
+  DEFAULT_GROUT_METERS,
+} from '../masters/rates'
 import {
   closeRing,
   openVertices,
   rectRing,
   ringBounds,
 } from '../model/geometry'
+import {
+  suggestAutoFitTile,
+  suggestAutoFitWall,
+} from '../model/patternFit'
 import type {
   EstimateInput,
   EstimateResult,
@@ -17,6 +24,7 @@ import type {
 } from '../model/types'
 import {
   convertLength,
+  fromMeters,
   toMeters,
   type LengthUnit,
 } from '../model/units'
@@ -52,6 +60,8 @@ export interface AppState {
   setTileUnit: (unit: LengthUnit) => void
   setPattern: (pattern: LayoutPattern) => void
   setRotation: (deg: number) => void
+  autoFitWallToPattern: () => boolean
+  autoFitTileToWall: () => boolean
   addOpening: (opening?: Partial<Opening>) => void
   updateOpening: (id: string, patch: Partial<Opening>) => void
   removeOpening: (id: string) => void
@@ -243,6 +253,50 @@ export const useEstimateStore = create<AppState>((set, get) => ({
   setRotation: (deg) => {
     set({ rotationDeg: deg })
     get().scheduleEstimate()
+  },
+
+  autoFitWallToPattern: () => {
+    const s = get()
+    const wu = s.wallUnit
+    const tu = s.tileUnit
+    const groutM =
+      s.grout === null ? DEFAULT_GROUT_METERS : toMeters(s.grout, tu)
+    const fit = suggestAutoFitWall({
+      wallWidth: toMeters(s.wallWidth, wu),
+      wallHeight: toMeters(s.wallHeight, wu),
+      tileWidth: toMeters(s.tileWidth, tu),
+      tileHeight: toMeters(s.tileHeight, tu),
+      grout: groutM,
+      pattern: s.pattern,
+    })
+    if (!fit.changed) return false
+    get().setWallSize(
+      fromMeters(fit.width, wu),
+      fromMeters(fit.height, wu),
+    )
+    return true
+  },
+
+  autoFitTileToWall: () => {
+    const s = get()
+    const wu = s.wallUnit
+    const tu = s.tileUnit
+    const groutM =
+      s.grout === null ? DEFAULT_GROUT_METERS : toMeters(s.grout, tu)
+    const fit = suggestAutoFitTile({
+      wallWidth: toMeters(s.wallWidth, wu),
+      wallHeight: toMeters(s.wallHeight, wu),
+      tileWidth: toMeters(s.tileWidth, tu),
+      tileHeight: toMeters(s.tileHeight, tu),
+      grout: groutM,
+      pattern: s.pattern,
+    })
+    if (!fit.changed) return false
+    get().setTile({
+      width: fromMeters(fit.width, tu),
+      height: fromMeters(fit.height, tu),
+    })
+    return true
   },
 
   addOpening: (opening) => {

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { translate, translateWarning } from './i18n/messages'
 import { LOSS_RATE_BY_TIER, resolveExtraOverTier } from './masters/rates'
 import { computeEffectiveRegion, rectRing } from './model/geometry'
-import { analyzePatternFit } from './model/patternFit'
+import { analyzePatternFit, suggestAutoFitTile, suggestAutoFitWall } from './model/patternFit'
 import { hasAnyOverlap, layoutTiles } from './model/tileLayout'
 import type { EstimateInput } from './model/types'
 import { convertLength, toMeters } from './model/units'
@@ -306,6 +306,65 @@ describe('pattern fit advice', () => {
     expect(
       result.warnings.some((w) => w.id === 'pattern_narrow_for_herringbone'),
     ).toBe(true)
+  })
+})
+
+describe('auto fit', () => {
+  it('suggestAutoFitWall rounds up to module multiples', () => {
+    const fit = suggestAutoFitWall({
+      wallWidth: 5.5,
+      wallHeight: 4.2,
+      tileWidth: 2,
+      tileHeight: 1,
+      grout: 0,
+      pattern: 'straight',
+    })
+    expect(fit.changed).toBe(true)
+    expect(fit.width).toBe(6)
+    expect(fit.height).toBe(5)
+  })
+
+  it('suggestAutoFitWall is unchanged when already aligned', () => {
+    const fit = suggestAutoFitWall({
+      wallWidth: 6,
+      wallHeight: 4,
+      tileWidth: 2,
+      tileHeight: 1,
+      grout: 0,
+      pattern: 'straight',
+    })
+    expect(fit.changed).toBe(false)
+    expect(fit.width).toBe(6)
+    expect(fit.height).toBe(4)
+  })
+
+  it('suggestAutoFitTile makes straight remainders zero', () => {
+    const wallWidth = 5.5
+    const wallHeight = 4.2
+    const fit = suggestAutoFitTile({
+      wallWidth,
+      wallHeight,
+      tileWidth: 2,
+      tileHeight: 1,
+      grout: 0,
+      pattern: 'straight',
+    })
+    expect(fit.changed).toBe(true)
+    expect(fit.width).toBeGreaterThan(0)
+    expect(fit.height).toBeGreaterThan(0)
+    const check = analyzePatternFit({
+      wallWidth,
+      wallHeight,
+      tileWidth: fit.width,
+      tileHeight: fit.height,
+      grout: 0,
+      pattern: 'straight',
+    })
+    expect(check.remW).toBe(0)
+    expect(check.remH).toBe(0)
+    // aspect roughly preserved (2:1)
+    expect(fit.width / fit.height).toBeGreaterThan(1.2)
+    expect(fit.width / fit.height).toBeLessThan(3)
   })
 })
 
