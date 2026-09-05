@@ -366,6 +366,58 @@ describe('auto fit', () => {
     expect(fit.width / fit.height).toBeGreaterThan(1.2)
     expect(fit.width / fit.height).toBeLessThan(3)
   })
+
+  it('suggestAutoFitTile herringbone clears edge remainders', () => {
+    const wallWidth = 10
+    const wallHeight = 10
+    const fit = suggestAutoFitTile({
+      wallWidth,
+      wallHeight,
+      tileWidth: 2,
+      tileHeight: 1,
+      grout: 0,
+      pattern: 'herringbone',
+    })
+    expect(fit.changed).toBe(true)
+    const check = analyzePatternFit({
+      wallWidth,
+      wallHeight,
+      tileWidth: fit.width,
+      tileHeight: fit.height,
+      grout: 0,
+      pattern: 'herringbone',
+    })
+    expect(check.remW).toBe(0)
+    expect(check.remH).toBe(0)
+    expect(check.warnings.some((w) => w.id === 'pattern_edge_cuts')).toBe(
+      false,
+    )
+  })
+
+  it('suggestAutoFitWall herringbone clears edge remainders', () => {
+    const fit = suggestAutoFitWall({
+      wallWidth: 10,
+      wallHeight: 10,
+      tileWidth: 2,
+      tileHeight: 1,
+      grout: 0,
+      pattern: 'herringbone',
+    })
+    expect(fit.changed).toBe(true)
+    const check = analyzePatternFit({
+      wallWidth: fit.width,
+      wallHeight: fit.height,
+      tileWidth: 2,
+      tileHeight: 1,
+      grout: 0,
+      pattern: 'herringbone',
+    })
+    expect(check.remW).toBe(0)
+    expect(check.remH).toBe(0)
+    expect(check.warnings.some((w) => w.id === 'pattern_edge_cuts')).toBe(
+      false,
+    )
+  })
 })
 
 describe('units', () => {

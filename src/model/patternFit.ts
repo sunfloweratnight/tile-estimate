@@ -35,6 +35,10 @@ function round3(n: number): number {
   return Math.round(n * 1000) / 1000
 }
 
+function round6(n: number): number {
+  return Math.round(n * 1e6) / 1e6
+}
+
 export function patternModuleSize(
   pattern: LayoutPattern,
   tileWidth: number,
@@ -77,6 +81,34 @@ function suggestDelta(rem: number, module: number): number {
   return round3(module - rem)
 }
 
+/** 壁辺をモジュールの整数倍へ切り上げ（表示は 3 桁）。 */
+function ceilToModule(length: number, module: number): number {
+  if (module <= EPS) return round3(length)
+  if (positiveRemainder(length, module) === 0) return round3(length)
+  const n = Math.max(1, Math.ceil((length - FIT_EPS) / module))
+  return round3(n * module)
+}
+
+function remOk(
+  wallWidth: number,
+  wallHeight: number,
+  tileWidth: number,
+  tileHeight: number,
+  grout: number,
+  pattern: LayoutPattern,
+): boolean {
+  const { moduleW, moduleH } = patternModuleSize(
+    pattern,
+    tileWidth,
+    tileHeight,
+    grout,
+  )
+  return (
+    positiveRemainder(wallWidth, moduleW) === 0 &&
+    positiveRemainder(wallHeight, moduleH) === 0
+  )
+}
+
 export type AutoFitInput = {
   wallWidth: number
   wallHeight: number
@@ -109,10 +141,8 @@ export function suggestAutoFitWall(options: AutoFitInput): AutoFitSize {
     tileHeight,
     g,
   )
-  const remW = positiveRemainder(wallWidth, moduleW)
-  const remH = positiveRemainder(wallHeight, moduleH)
-  const width = round3(wallWidth + suggestDelta(remW, moduleW))
-  const height = round3(wallHeight + suggestDelta(remH, moduleH))
+  const width = ceilToModule(wallWidth, moduleW)
+  const height = ceilToModule(wallHeight, moduleH)
   const changed =
     Math.abs(width - wallWidth) > EPS || Math.abs(height - wallHeight) > EPS
   return { width, height, changed }
@@ -120,6 +150,7 @@ export function suggestAutoFitWall(options: AutoFitInput): AutoFitSize {
 
 /**
  * 壁固定でタイル寸法を調整し、壁が整数モジュールになるようにする。
+ * 丸め後も rem≈0 になるまで nx/ny を下げて再試行する。
  */
 export function suggestAutoFitTile(options: AutoFitInput): AutoFitSize {
   const {
@@ -159,11 +190,16 @@ export function suggestAutoFitTile(options: AutoFitInput): AutoFitSize {
 
     switch (pattern) {
       case 'basketweave': {
-        const target = Math.min(targetMW, targetMH)
-        const s = (target - g) / 2
-        if (s > EPS) {
+        // 正方形セルが幅・高さの両方を割り切る組み合わせを探す
+        let found = false
+        for (let cx = nx; cx >= 1 && !found; cx--) {
+          const cell = wallWidth / cx
+          if (cell <= g + EPS) continue
+          if (positiveRemainder(wallHeight, cell) !== 0) continue
+          const s = (cell - g) / 2
+          if (s <= EPS) continue
           const long = s
-          const short = long * aspectShortOverLong
+          const short = Math.max(long * aspectShortOverLong, EPS)
           if (landscape) {
             tw = long
             th = short
@@ -171,12 +207,14 @@ export function suggestAutoFitTile(options: AutoFitInput): AutoFitSize {
             tw = short
             th = long
           }
+          found = true
         }
         break
       }
       case 'herringbone': {
-        const L = targetMW / Math.SQRT2 - g
-        const W = targetMH / Math.SQRT2 - g
+        // (L+g)·√2 = wallW/nx が成り立つよう逆算（丸め前）
+        const L = wallWidth / (nx * Math.SQRT2) - g
+        const W = wallHeight / (ny * Math.SQRT2) - g
         if (L > EPS && W > EPS) {
           if (landscape) {
             tw = L
@@ -189,18 +227,47 @@ export function suggestAutoFitTile(options: AutoFitInput): AutoFitSize {
         break
       }
       default: {
-        tw = targetMW - g
-        th = targetMH - g
+        tw = wallWidth / nx - g
+        th = wallHeight / ny - g
         break
       }
     }
 
     if (tw > EPS && th > EPS) {
-      tw = round3(tw)
-      th = round3(th)
-      const changed =
-        Math.abs(tw - tileWidth) > EPS || Math.abs(th - tileHeight) > EPS
-      return { width: tw, height: th, changed }
+      // √2 増幅に耐えるため 6 桁。それでも rem 非0なら桁を保ったまま再検証
+      let rw = round6(tw)
+      let rh = round6(th)
+      if (!remOk(wallWidth, wallHeight, rw, rh, g, pattern)) {
+        // 丸めで崩れた場合、逆算値をそのまま 6 桁に張り直し（herringbone は wall/(n√2)-g）
+        if (pattern === 'herringbone') {
+          const L = wallWidth / (nx * Math.SQRT2) - g
+          const W = wallHeight / (ny * Math.SQRT2) - g
+          if (landscape) {
+            rw = round6(L)
+            rh = round6(W)
+          } else {
+            rw = round6(W)
+            rh = round6(L)
+          }
+        } else if (pattern === 'basketweave') {
+          // セルを壁幅・高さの両方で割り切れる最大に近づけるのは難しいので
+          // 両辺 rem が消えるまで ny/nx を下げる側に任せる
+        } else {
+          rw = round6(wallWidth / nx - g)
+          rh = round6(wallHeight / ny - g)
+        }
+      }
+
+      if (
+        rw > EPS &&
+        rh > EPS &&
+        remOk(wallWidth, wallHeight, rw, rh, g, pattern)
+      ) {
+        const changed =
+          Math.abs(rw - tileWidth) > FIT_EPS ||
+          Math.abs(rh - tileHeight) > FIT_EPS
+        return { width: rw, height: rh, changed }
+      }
     }
 
     if (nx >= ny && nx > 1) nx -= 1

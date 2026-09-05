@@ -92,7 +92,7 @@ export function ResultPanel() {
       {result && (
         <p className="muted layout-hint">{t('result.layoutTilesHint')}</p>
       )}
-      {result && result.warnings.length > 0 && (
+      {result && !estimating && result.warnings.length > 0 && (
         <ul className="warnings">
           {result.warnings.map((w, i) => (
             <li key={`${w.id}-${i}`}>{tw(w)}</li>
