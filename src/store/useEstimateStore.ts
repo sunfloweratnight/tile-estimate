@@ -174,16 +174,14 @@ export const useEstimateStore = create<AppState>((set, get) => ({
 
   scheduleEstimate: () => {
     if (debounceTimer) clearTimeout(debounceTimer)
+    // デバウンス待ちのあいだも古い収まり警告を残さない
+    set((s) => ({
+      estimating: true,
+      error: null,
+      result: s.result ? { ...s.result, warnings: [] } : null,
+    }))
     debounceTimer = setTimeout(async () => {
       const seq = ++requestSeq
-      set((s) => ({
-        estimating: true,
-        error: null,
-        // 再計算中に古い収まり警告が残って Autofit 失敗に見えないようにする
-        result: s.result
-          ? { ...s.result, warnings: [] }
-          : null,
-      }))
       try {
         const result = await estimateInWorker(get().buildInput())
         if (seq !== requestSeq) return
