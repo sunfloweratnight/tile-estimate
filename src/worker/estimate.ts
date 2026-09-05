@@ -8,6 +8,7 @@ import {
 } from '../masters/rates'
 import type { EstimateWarning } from '../i18n/messages'
 import { computeEffectiveRegion } from '../model/geometry'
+import { analyzePatternFit } from '../model/patternFit'
 import type { EstimateInput, EstimateResult } from '../model/types'
 
 function roundMoney(n: number): number {
@@ -68,12 +69,23 @@ export function estimateWall(input: EstimateInput): EstimateResult {
   const baseLaborAmount = roundMoney(effectiveArea * basePerArea)
   const extraOverAmount = roundMoney(effectiveArea * extraOverRate)
 
+  const fit = analyzePatternFit({
+    wallWidth: wall.width,
+    wallHeight: wall.height,
+    tileWidth: tile.width,
+    tileHeight: tile.height,
+    grout: usedGrout,
+    pattern: layout.pattern,
+  })
+  warnings.push(...fit.warnings)
+
   return {
     effectiveArea,
     tileEffectiveArea,
     theoreticalCount,
     lossRate,
     requiredTiles: Number.isFinite(requiredTiles) ? requiredTiles : 0,
+    layoutTileCount: fit.layoutTileCount,
     extraOverTier: tier,
     extraOverRate,
     baseLaborAmount,
@@ -96,6 +108,7 @@ function emptyResult(
     theoreticalCount: 0,
     lossRate: 0,
     requiredTiles: 0,
+    layoutTileCount: 0,
     extraOverTier: 'Std',
     extraOverRate: 0,
     baseLaborAmount: 0,

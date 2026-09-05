@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { translate, translateWarning } from './i18n/messages'
 import { LOSS_RATE_BY_TIER, resolveExtraOverTier } from './masters/rates'
 import { computeEffectiveRegion, rectRing } from './model/geometry'
+import { analyzePatternFit } from './model/patternFit'
 import { hasAnyOverlap, layoutTiles } from './model/tileLayout'
 import type { EstimateInput } from './model/types'
 import { convertLength, toMeters } from './model/units'
@@ -219,6 +220,92 @@ describe('tile non-overlap constraint', () => {
     expect(plus.length).toBeGreaterThan(5)
     expect(minus.length).toBeGreaterThan(5)
     expect(hasAnyOverlap(tiles)).toBe(false)
+  })
+
+  it('herringbone A/B pair nest with short-to-long contact', () => {
+    const tiles = layoutTiles({
+      wallWidth: 8,
+      wallHeight: 8,
+      tileWidth: 2,
+      tileHeight: 1,
+      grout: 0,
+      pattern: 'herringbone',
+    })
+    const a = tiles.find((t) => t.rotationDeg === 45 && Math.abs(t.anchorX ?? 0) < 1e-6)
+    const b = tiles.find(
+      (t) =>
+        t.rotationDeg === -45 &&
+        a != null &&
+        Math.abs((t.anchorX ?? 0) - Math.SQRT1_2) < 0.05,
+    )
+    expect(a).toBeTruthy()
+    expect(b).toBeTruthy()
+  })
+})
+
+describe('pattern fit advice', () => {
+  it('exact module multiple wall has no edge-cut warnings for straight', () => {
+    const fit = analyzePatternFit({
+      wallWidth: 6,
+      wallHeight: 4,
+      tileWidth: 2,
+      tileHeight: 1,
+      grout: 0,
+      pattern: 'straight',
+    })
+    expect(fit.remW).toBe(0)
+    expect(fit.remH).toBe(0)
+    expect(fit.warnings.some((w) => w.id === 'pattern_edge_cuts')).toBe(false)
+    expect(fit.layoutTileCount).toBeGreaterThan(0)
+  })
+
+  it('non-multiple wall emits pattern_edge_cuts for straight', () => {
+    const fit = analyzePatternFit({
+      wallWidth: 5.5,
+      wallHeight: 4.2,
+      tileWidth: 2,
+      tileHeight: 1,
+      grout: 0,
+      pattern: 'straight',
+    })
+    expect(fit.remW).toBeGreaterThan(0)
+    expect(fit.warnings.some((w) => w.id === 'pattern_edge_cuts')).toBe(true)
+    expect(fit.warnings.some((w) => w.id === 'pattern_advice_adjust')).toBe(true)
+  })
+
+  it('estimate includes layoutTileCount reference', () => {
+    const result = estimateWall(
+      baseInput({
+        layout: { pattern: 'straight', rotationDeg: 0 },
+        tile: {
+          width: 1,
+          height: 1,
+          kind: 'standard',
+          grout: 0,
+          lossRateOverride: null,
+        },
+      }),
+    )
+    expect(result.layoutTileCount).toBeGreaterThan(0)
+  })
+
+  it('narrow wall warns for herringbone', () => {
+    const result = estimateWall(
+      baseInput({
+        wall: { id: 'w', width: 1, height: 1, openings: [] },
+        tile: {
+          width: 2,
+          height: 1,
+          kind: 'standard',
+          grout: 0,
+          lossRateOverride: null,
+        },
+        layout: { pattern: 'herringbone', rotationDeg: 0 },
+      }),
+    )
+    expect(
+      result.warnings.some((w) => w.id === 'pattern_narrow_for_herringbone'),
+    ).toBe(true)
   })
 })
 

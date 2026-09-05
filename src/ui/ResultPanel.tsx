@@ -83,7 +83,14 @@ export function ResultPanel() {
               {t(`pattern.${result.pattern as LayoutPattern}`)}
             </dd>
           </div>
+          <div>
+            <dt>{t('result.layoutTiles')}</dt>
+            <dd>{result.layoutTileCount}</dd>
+          </div>
         </dl>
+      )}
+      {result && (
+        <p className="muted layout-hint">{t('result.layoutTilesHint')}</p>
       )}
       {result && result.warnings.length > 0 && (
         <ul className="warnings">

@@ -81,9 +81,11 @@ const ja: Dict = {
   'result.extraOver': 'Extra over',
   'result.grout': '使用目地',
   'result.pattern': '並べ方',
+  'result.layoutTiles': '配置枚数（参考）',
+  'result.layoutTilesHint': 'プレビュー上で壁と重なるタイル数。必要枚数は面積×ロスが正です。',
 
   'canvas.edit': '壁エディタ（開口をドラッグ / 凹凸時は頂点もドラッグ）',
-  'canvas.preview': '並べ方プレビュー（ヘリンボーンは ±45° の噛み合わせ）',
+  'canvas.preview': '並べ方プレビュー（ヘリンボーンは ±45° の短辺×長辺の噛み合わせ）',
   'canvas.previewTitle': 'プレビュー · {pattern}',
   'canvas.irregular': '凹凸壁 · 頂点 {count}（{unit}）',
   'canvas.size': '{width} × {height} {unit}',
@@ -97,6 +99,14 @@ const ja: Dict = {
   'warn.opening_outside': '開口「{id}」が壁の外にはみ出しています',
   'warn.boolean_fallback':
     '開口の差し引きに失敗したため、面積の単純引きで代替しています',
+  'warn.pattern_edge_cuts':
+    'この寸法だと端に切り加工が入ります（余り 幅 {remW} / 高さ {remH}）。きれいに収めたい場合は壁かタイル寸法の調整を検討してください。',
+  'warn.pattern_fit_awkward':
+    '並べ方の繰り返し単位に対して壁寸法が中途半端です。模様が途中で切れやすくなります。',
+  'warn.pattern_narrow_for_herringbone':
+    '壁がヘリンボーンの最小ユニット（目安 {need}）より狭いため、模様がきれいに出にくいです。',
+  'warn.pattern_advice_adjust':
+    '目安: 幅をあと {addW}、高さをあと {addH} 足す（またはタイル／目地を変える）と、端の切りを減らせます。',
 }
 
 const en: Dict = {
@@ -171,9 +181,13 @@ const en: Dict = {
   'result.extraOver': 'Extra over',
   'result.grout': 'Grout used',
   'result.pattern': 'Layout',
+  'result.layoutTiles': 'Layout tiles (reference)',
+  'result.layoutTilesHint':
+    'Tiles intersecting the wall in the preview. Required count still uses area × loss.',
 
   'canvas.edit': 'Wall editor (drag openings / vertices in outline mode)',
-  'canvas.preview': 'Layout preview (herringbone uses ±45° nesting)',
+  'canvas.preview':
+    'Layout preview (herringbone: ±45° short-edge to long-edge nesting)',
   'canvas.previewTitle': 'Preview · {pattern}',
   'canvas.irregular': 'Irregular wall · {count} vertices ({unit})',
   'canvas.size': '{width} × {height} {unit}',
@@ -187,6 +201,14 @@ const en: Dict = {
   'warn.opening_outside': 'Opening "{id}" extends outside the wall',
   'warn.boolean_fallback':
     'Opening subtract failed; using gross area minus opening areas',
+  'warn.pattern_edge_cuts':
+    'This size needs edge cuts (remainder width {remW} / height {remH}). Adjust wall or tile size for a cleaner fit.',
+  'warn.pattern_fit_awkward':
+    'Wall size sits awkwardly vs the layout repeat unit; the pattern may break mid-motif.',
+  'warn.pattern_narrow_for_herringbone':
+    'Wall is narrower than the herringbone minimum unit (~{need}); the pattern may not read clearly.',
+  'warn.pattern_advice_adjust':
+    'Tip: adding about {addW} to width and {addH} to height (or changing tile/grout) can reduce edge cuts.',
 }
 
 const TABLES: Record<Locale, Dict> = { ja, en }
@@ -200,6 +222,10 @@ export type WarningId =
   | 'opening_size_invalid'
   | 'opening_outside'
   | 'boolean_fallback'
+  | 'pattern_edge_cuts'
+  | 'pattern_fit_awkward'
+  | 'pattern_narrow_for_herringbone'
+  | 'pattern_advice_adjust'
 
 export interface EstimateWarning {
   id: WarningId

@@ -257,6 +257,12 @@ body {
   font-size: 0.9rem;
 }
 
+.layout-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
 .error {
   color: #b71c1c;
 }

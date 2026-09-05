@@ -79,6 +79,8 @@ export interface EstimateResult {
   theoreticalCount: number
   lossRate: number
   requiredTiles: number
+  /** 配置プレビュー上の枚数（壁と交差するタイル数）。参考値。 */
+  layoutTileCount: number
   extraOverTier: ExtraOverTier
   extraOverRate: number
   baseLaborAmount: number

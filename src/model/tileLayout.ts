@@ -250,15 +250,32 @@ function layoutBasketweave(
 }
 
 /**
+ * ヘリンボーン（±45°）の繰り返しモジュール（壁座標の軸平行 AABB 目安）。
+ * 格子: v1=( (L+g)·√2 , 0 ), v2=( 0 , (W+g)·√2 )
+ */
+export function herringboneModuleSize(
+  tileWidth: number,
+  tileHeight: number,
+  grout: number,
+): { moduleW: number; moduleH: number; long: number; short: number } {
+  const g = Math.max(0, grout)
+  const long = Math.max(tileWidth, tileHeight)
+  const short = Math.min(tileWidth, tileHeight)
+  return {
+    long,
+    short,
+    moduleW: (long + g) * Math.SQRT2,
+    moduleH: (short + g) * Math.SQRT2,
+  }
+}
+
+/**
  * ヘリンボーン（45°）:
  *
- * 参照 HTML の step=w·cos で A/B を毎格子に置くと隣接セル同士が重なる。
- * 平面を埋めつつ重ならない配置は、タイル中心を格子に置き:
- *   - 格子間隔 step = (w + h) / √2
- *   - A: 中心 (i·step, j·step)、+45°
- *   - B: 中心を ((w+h)/2)·(cos45, sin45) ずらして −45°
- * 描画は参照と同じく「角を原点に translate → rotate → rect」。
- * 目地 g は描画寸法だけ縮める（ステップは公称サイズ基準）。
+ * - 長辺 L・短辺 W。A(+45°) の長辺上（原点から短辺距離）に B(−45°) の短辺が噛み合う
+ * - B オフセット: ( (W+g)·cos45, (W+g)·sin45 )
+ * - 非重なり・面積密度1の格子: stepX=(L+g)·√2 , stepY=(W+g)·√2
+ * - 描画は角アンカー → rotate → rect
  */
 function layoutHerringbone(
   tiles: PlacedTile[],
@@ -268,36 +285,28 @@ function layoutHerringbone(
   th: number,
   g: number,
 ): void {
-  const w = Math.max(tw, th)
-  const h = Math.min(tw, th)
+  const L = Math.max(tw, th)
+  const W = Math.min(tw, th)
   const angle = Math.PI / 4
   const cos = Math.cos(angle)
   const sin = Math.sin(angle)
 
-  const drawW = Math.max(w - g, w * 0.5)
-  const drawH = Math.max(h - g, h * 0.5)
+  const stepX = (L + g) * Math.SQRT2
+  const stepY = (W + g) * Math.SQRT2
+  const bOffX = (W + g) * cos
+  const bOffY = (W + g) * sin
 
-  const step = (w + h) / Math.SQRT2
-  const pairDx = ((w + h) / 2) * cos
-  const pairDy = ((w + h) / 2) * sin
+  const i0 = Math.floor(-L / stepX) - 2
+  const i1 = Math.ceil((wallW + L) / stepX) + 2
+  const j0 = Math.floor(-L / stepY) - 2
+  const j1 = Math.ceil((wallH + L) / stepY) + 2
 
-  const pushCentered = (cx: number, cy: number, rotationDeg: number) => {
-    const rot = (rotationDeg * Math.PI) / 180
-    const c = Math.cos(rot)
-    const s = Math.sin(rot)
-    // 局所中心 (drawW/2, drawH/2) が世界座標 (cx, cy) になるよう角アンカーを決める
-    const lx = drawW / 2
-    const ly = drawH / 2
-    const ax = cx - (lx * c - ly * s)
-    const ay = cy - (lx * s + ly * c)
-    pushRotated(tiles, wallW, wallH, ax, ay, drawW, drawH, rotationDeg)
-  }
-
-  const margin = w + h
-  for (let x = -margin; x < wallW + margin; x += step) {
-    for (let y = -margin; y < wallH + margin; y += step) {
-      pushCentered(x, y, 45)
-      pushCentered(x + pairDx, y + pairDy, -45)
+  for (let i = i0; i <= i1; i++) {
+    for (let j = j0; j <= j1; j++) {
+      const x = i * stepX
+      const y = j * stepY
+      pushRotated(tiles, wallW, wallH, x, y, L, W, 45)
+      pushRotated(tiles, wallW, wallH, x + bOffX, y + bOffY, L, W, -45)
     }
   }
 }
